@@ -1,0 +1,41 @@
+<style>
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    // init
+    $(document).ready(function(e)
+    {
+        var canvas = document.getElementById("sky");
+        var canvasWidth = canvas.width;
+        var canvasHeight = canvas.height;
+        var ctx = canvas.getContext("2d");
+        var canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+        // That's how you define the value of a pixel //
+        function drawPixel (x, y, r, g, b, a) {
+            var index = (x + y * canvasWidth) * 4;
+
+            canvasData.data[index + 0] = r;
+            canvasData.data[index + 1] = g;
+            canvasData.data[index + 2] = b;
+            canvasData.data[index + 3] = a;
+        }
+        // That's how you update the canvas, so that your //
+        // modification are taken in consideration //
+        function updateCanvas() {
+            ctx.putImageData(canvasData, 0, 0);
+        }
+
+        function move(idx, t)
+        {
+            l = len(stars);
+            for(i = 0; i < l; i++)
+            {
+                s = stars[i];
+                drawPixel(s.pos.x, s.pos.y, 255, 255, 255, 255);
+            }
+        }
+    });
+</script>
+<input type="number" id="time", step="1" value="0">
+<canvas id="sky" width="100000" height="100000"></canvas>
