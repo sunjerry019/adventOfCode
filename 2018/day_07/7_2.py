@@ -1,8 +1,10 @@
 #!/bin/python3
 
+# WARNING: There seems to be a edgecase where using samuel_7.in and zhiayang_7.in produces a answer that is 1 (one) tick more 
+
 import numpy as np
 
-input = open("samuel_7.in","r")
+input = open("7.in","r")
 inputContents = input.readlines()
 dependencies = {}
 stepsCompleted = {}
