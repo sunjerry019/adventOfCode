@@ -2,7 +2,7 @@
 
 import numpy as np
 
-input = open("7.in","r")
+input = open("samuel_7.in","r")
 inputContents = input.readlines()
 dependencies = {}
 stepsCompleted = {}
