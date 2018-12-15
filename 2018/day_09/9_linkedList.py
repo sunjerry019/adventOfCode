@@ -140,6 +140,7 @@ class Problem():
         while self.playersNumbers * rowsPlayer < rows23 * 23:
             rowsPlayer += 1
 
+        # https://stackoverflow.com/a/8489498
         a              = np.zeros((rows23, 22))
         self.marbles23 = np.arange(1, rows23*23 + 1)
         if self.marbles23[-1] > self.lastMarblePts:

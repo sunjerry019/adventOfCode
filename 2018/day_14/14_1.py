@@ -13,6 +13,8 @@ class Problem():
             score = self.recipeScores[self.elfRecipe[0]] + self.recipeScores[self.elfRecipe[1]]
             # print(self.recipeScores[self.elfRecipe[0]], self.recipeScores[self.elfRecipe[1]])
             try:
+                # https://stackoverflow.com/a/21270442
+                # added 0.001 to handle powers of 10
                 newRecipes = [(score//(10**i))%10 for i in range(math.ceil(math.log(score, 10)+0.001)-1, -1, -1)]
             except:
                 newRecipes = [0]
