@@ -34,16 +34,22 @@ class Problem():
 
                 if self.opcodeMapping[operation[0]]:
                     if len(self.opcodeMapping[operation[0]]) > 1:
-                        self.opcodeMapping[operation[0]] = self.opcodeMapping[operation[0]].intersection({ possibilities })
+                        self.opcodeMapping[operation[0]] = self.opcodeMapping[operation[0]].intersection(set(possibilities))
                 else:
-                    self.opcodeMapping[operation[0]] = { possibilities[0] }
+                    self.opcodeMapping[operation[0]] = set(possibilities)
+
+            if len(self.opcodeMapping[operation[0]]) == 1:
+                # Remove all other instances of this from other numbers:
+                for i in range(16):
+                    if i != operation[0] and self.opcodeMapping[i]:
+                        self.opcodeMapping[i] -= self.opcodeMapping[operation[0]]
 
         print("Part 1 = {}/{}".format(self.threeOrMore, self.totalSamples))
 
         self.opcodeMapping = [next(iter(s)) for s in self.opcodeMapping]
 
         # PART 2
-        print(self.opcodeMapping)
+        # print(self.opcodeMapping)
         self.it += 2
         self.program = self.inputContents[self.it:]
         self.registers = np.zeros(4, dtype=np.uint64)
@@ -51,11 +57,11 @@ class Problem():
             operation = [np.uint64(x) for x in line.strip().split(" ")]
             operation[0] = self.opcodeMapping[operation[0]]
             newReg = self.runOperation(copy.deepcopy(self.registers), operation)
-            print(self.registers, operation, newReg)
+            # print(self.registers, operation, newReg)
             self.registers = newReg
 
 
-        print("Part 2 = {}".format(self.registers))
+        print("Part 2 = {}".format(self.registers[0]))
 
 
     def possibleOpCodes(self, before, operation, after):
