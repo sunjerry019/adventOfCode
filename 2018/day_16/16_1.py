@@ -7,12 +7,8 @@ class Problem():
     def __init__ (self):
         self.input = open("16.in", "r")
         self.inputContents = self.input.readlines()
-<<<<<<< HEAD
         self.opcodes = ["addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori", "setr", "seti", "gtir", "gtri", "gtrr", "eqir", "eqri", "eqrr"]
         self.opcodeMapping = np.zeros((16,)).tolist()
-=======
-        self.opcodes = ["addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori", "setr", "seti", "gtir", "gtri", "gtrr"]
->>>>>>> 7c47dc53e42c5d7fee852b0408c8030919205118
 
         # Get the input for the first part of the question
         self.it = 0
@@ -28,7 +24,6 @@ class Problem():
             self.it += 2
 
             possibilities = self.possibleOpCodes(before, operation, after)
-<<<<<<< HEAD
             l = len(possibilities)
             if l == 1:
                 self.opcodeMapping[operation[0]] = { possibilities[0] }
@@ -48,7 +43,7 @@ class Problem():
         self.opcodeMapping = [next(iter(s)) for s in self.opcodeMapping]
 
         # PART 2
-
+        print(self.opcodeMapping)
         self.it += 2
         self.program = self.inputContents[self.it:]
         self.registers = np.zeros(4, dtype=np.uint64)
@@ -56,19 +51,11 @@ class Problem():
             operation = [np.uint64(x) for x in line.strip().split(" ")]
             operation[0] = self.opcodeMapping[operation[0]]
             newReg = self.runOperation(copy.deepcopy(self.registers), operation)
+            print(self.registers, operation, newReg)
             self.registers = newReg
-            print(self.registers, operation)
 
 
         print("Part 2 = {}".format(self.registers))
-=======
-            if len(possibilities) >= 3:
-                self.threeOrMore += 1
-                print(len(possibilities))
-            print("")
-
-        print("{}/{}".format(self.threeOrMore, self.totalSamples))
->>>>>>> 7c47dc53e42c5d7fee852b0408c8030919205118
 
 
     def possibleOpCodes(self, before, operation, after):
@@ -77,11 +64,7 @@ class Problem():
             o = copy.deepcopy(operation)
             o[0] = opcode
             reg = self.runOperation(copy.deepcopy(before), o)
-<<<<<<< HEAD
             # print(before, o, reg, after)
-=======
-            print(before, o, reg, after)
->>>>>>> 7c47dc53e42c5d7fee852b0408c8030919205118
             if np.array_equal(reg, after):
                 possibilities.append(opcode)
         return possibilities
