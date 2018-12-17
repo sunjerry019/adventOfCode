@@ -1,6 +1,6 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
-# WARNING: There seems to be a edgecase where using samuel_7.in and zhiayang_7.in produces a answer that is 1 (one) tick more 
+# WARNING: There seems to be a edgecase where using samuel_7.in and zhiayang_7.in produces a answer that is 1 (one) tick more
 
 import numpy as np
 

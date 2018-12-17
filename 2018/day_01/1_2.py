@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 input = open("1.in","r")
 inputContents = input.readlines()
