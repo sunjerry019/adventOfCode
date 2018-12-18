@@ -36,7 +36,7 @@ class Problem():
         if marbleidx % 23 != 0:
             btwMarbles = np.array([self.currentMarbleIdx + 1, self.currentMarbleIdx + 2]) % len(self.circle)
 
-            if np.abs(btwMarbles[0] - btwMarbles[1]) > 1:
+            if abs(btwMarbles[0] - btwMarbles[1]) > 1:
                 if max(btwMarbles) == len(self.circle) - 1 and min(btwMarbles) == 0:
                     insertIdx = len(self.circle)
                 else:

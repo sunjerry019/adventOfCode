@@ -7,7 +7,7 @@ sys.setrecursionlimit(5000)
 
 class Problem():
     def __init__(self):
-        self.input = open("17.in","r")
+        self.input = open("17.example.in","r")
         self.inputContents = self.input.readlines()
 
         self.blocks = {}        # includes clay and settled water
