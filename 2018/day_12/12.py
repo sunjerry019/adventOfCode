@@ -39,6 +39,19 @@ class Problem():
             self.currGen = i + 1
             if not self.justRun:
                 self.tick()
+
+                # Check answer
+                self.currAnswer = 0
+                for i in range(self.bounds[0], self.bounds[1] + 1):
+                    if self.getStateAtIndex(self.state, i):
+                        self.currAnswer += i
+                diff = self.currAnswer - self.prevAnswer
+                if diff == self.prevAnswerDiff:
+                    self.justRun = True
+                self.prevAnswerDiff = diff
+                self.prevAnswer = self.currAnswer
+
+                # For Part 1
                 if self.currGen == self.part1:
                     self.sum = 0
                     for i in range(self.bounds[0], self.bounds[1] + 1):
@@ -132,18 +145,6 @@ class Problem():
             return 0
 
     def printProgress(self, currentIdx=0):
-        if not self.justRun:
-            self.currAnswer = 0
-            for i in range(self.bounds[0], self.bounds[1] + 1):
-                if self.getStateAtIndex(self.state, i):
-                    self.currAnswer += i
-
-            diff = self.currAnswer - self.prevAnswer
-            if diff == self.prevAnswerDiff:
-                self.justRun = True
-            self.prevAnswerDiff = diff
-            self.prevAnswer = self.currAnswer
-
         # outputStr = "\033[2K[{:>" + self.generationsDigits + "}/{:>" + self.generationsDigits + "}] At ({:>7}/{:>7})"
         outputStr = "\033[2K[{:>" + self.generationsDigits + "}/{:>" + self.generationsDigits + "}]"
         print(outputStr.format(self.currGen, self.generations), end="")
