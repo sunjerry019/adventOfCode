@@ -7,7 +7,6 @@ class Group():
 	def __init__(self, _id, _klasse, _units, _hp, _weakness, _immune, _damagePts, _damageType, _initiative):
 		self.id = _id
 		self.klasse = _klasse
-		self.oUnits = _units
 		self.units = _units
 		self.hp = _hp
 		self.weakness = _weakness
@@ -27,25 +26,77 @@ class Problem():
 		self.input = open("24.in","r")
 		self.inputContents = self.input.readlines()
 		self.inputLength = len(self.inputContents)
+		self.ordnung = ["Immune System", "Infection", "No Winner"]
 		
 		# 0 = immune system; 1 = infection
 		self.armies = [{},{}]
 		self.parseInput()
-		self.originalArmies = copy.deepcopy(self.originalArmies)
+		self.originalArmies = copy.deepcopy(self.armies)
 		
 		# Part 1
+		self.part1 = self.solve()
+		print("{} wins, Part 1 = {}".format(self.ordnung[self.part1[0]], self.part1[1]))	
+		
+		# Part 2
+		self.boost = 0 # equals to part 1 answer
+		self.interval = 1000
+		self.boosted = {}
+		self.prevWinner = self.part1[0]
+		self.prevAns = 0
+		self.part2 = (0,0)
+		while True: # (self.boost + self.interval) not in self.boosted
+			self.boost += self.interval
+			print("Boost = {}".format(self.boost))
+			self.boosted[self.boost] = 1
+			self.addBoost()
+			w, a = self.solve()
+			if w != self.prevWinner and abs(self.interval) != 1:
+				# we change direction and reduce the step
+				self.interval *= -0.5
+				self.interval = math.ceil(self.interval)
+			elif w != self.prevWinner:
+				if w == 0:
+					self.part2 = (0, a)
+					break
+				else:
+					self.boost -= self.interval
+					self.part2 = (0, self.prevAns)
+					break
+			self.prevWinner = w
+			self.prevAns = a
+		print("{} wins, Boost = {}, Part 2 = {}".format(self.ordnung[self.part2[0]], self.boost, self.part2[1]))	
+	
+	def addBoost(self):
+		self.armies = copy.deepcopy(self.originalArmies)
+		for uid in self.armies[0]:
+			self.armies[0][uid].damagePts += self.boost
+	
+	def solve(self):
 		self.rounds = 0
+		self.prevTickAns = False
 		while len(self.armies[0]) and len(self.armies[1]):
 			self.rounds += 1
 			print("Tick {}".format(self.rounds), end='\r')
 			self.tick()
-		
-		self.part1 = 0
+			s_w, s_a = self.calcAns()
+			if self.prevTickAns and self.prevTickAns[1] == s_a:
+				# no change
+				return s_w, s_a
+			self.prevTickAns = (s_w, s_a)
+
+		return self.calcAns()
+	
+	def calcAns(self):
+		_ul = 0
+		_w = -1
 		for i in range(2):
 			for uid in self.armies[i]:
-				self.part1 += self.armies[i][uid].units
-		print("Part 1 = {}".format(self.part1))
-		
+				_ul+= self.armies[i][uid].units
+				if self.armies[i][uid].units > 0 and _w < 0:
+					_w = i
+				elif self.armies[i][uid].units > 0 and _w != i:
+					_w = 2
+		return _w, _ul
 	
 	def tick(self):
 		# Target Selection
@@ -179,9 +230,8 @@ class Problem():
 		return sorted(ret, key=ret.get, reverse=True)
 	
 	def printStatus(self):
-		ordnung = ["Immune System", "Infection"]
 		for i in range(2):
-			print(ordnung[i])
+			print(self.ordnung[i])
 			for uid in self.armies[i]:
 				print("Group {} contains {} units".format(uid, self.armies[i][uid].units))
 	
