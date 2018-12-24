@@ -7,6 +7,7 @@ class Group():
 	def __init__(self, _id, _klasse, _units, _hp, _weakness, _immune, _damagePts, _damageType, _initiative):
 		self.id = _id
 		self.klasse = _klasse
+		self.oUnits = _units
 		self.units = _units
 		self.hp = _hp
 		self.weakness = _weakness
@@ -17,16 +18,175 @@ class Group():
 		
 	def __repr__(self):
 		return "< Group {} (Type {}): \n  Units    = {}\n  HP       = {}\n  Weakness = {}\n  Immunity = {}\n  Damage   = {} x {}\n  Init     = {}\n>".format(self.id, self.klasse, self.units, self.hp, self.weakness, self.immune, self.damagePts, self.damageType, self.initiative)
+	
+	def effectivePower(self):
+		return self.units * self.damagePts
 
 class Problem():
 	def __init__(self):
 		self.input = open("24.in","r")
 		self.inputContents = self.input.readlines()
 		self.inputLength = len(self.inputContents)
+		
 		# 0 = immune system; 1 = infection
 		self.armies = [{},{}]
-		self.it = -1
+		self.parseInput()
+		self.originalArmies = copy.deepcopy(self.originalArmies)
 		
+		# Part 1
+		self.rounds = 0
+		while len(self.armies[0]) and len(self.armies[1]):
+			self.rounds += 1
+			print("Tick {}".format(self.rounds), end='\r')
+			self.tick()
+		
+		self.part1 = 0
+		for i in range(2):
+			for uid in self.armies[i]:
+				self.part1 += self.armies[i][uid].units
+		print("Part 1 = {}".format(self.part1))
+		
+	
+	def tick(self):
+		# Target Selection
+		self.selectTargets()
+		# Attacking Phase
+		self.attackTargets()
+		
+	def attackTargets(self):
+		gesortiert2 = self.sortArmies("init")
+		for _unitID in gesortiert2:
+			if self.isAlive(_unitID) and _unitID in self.targetsR and self.isAlive(self.targetsR[_unitID]): # Can attack and enemy is alive
+				klasse, u = self.getUnit(_unitID)
+				enemy = klasse ^ 1
+				_dmg = u.damagePts * u.units
+				if u.damageType in self.armies[enemy][self.targetsR[_unitID]].immune:
+					_dmg *= 0
+				if u.damageType in self.armies[enemy][self.targetsR[_unitID]].weakness:
+					_dmg *= 2
+				
+				_deltaU = _dmg // self.armies[enemy][self.targetsR[_unitID]].hp
+				self.armies[enemy][self.targetsR[_unitID]].units -= _deltaU
+				
+				# check if ded
+				if self.armies[enemy][self.targetsR[_unitID]].units <= 0:
+					del self.armies[enemy][self.targetsR[_unitID]]
+					
+					# Check if anybody else alive
+					if not len(self.armies[enemy]):
+						return False
+		return True
+					
+	def selectTargets(self):
+		gesortiert = self.sortArmies("ep-init")
+		self.targets = {}   # <k,v> = Target, Attacker
+		self.targetsR = {}  # <k,v> = Attacker, Target
+		for _unitID in gesortiert:
+			klasse, u = self.getUnit(_unitID)
+			enemy = klasse ^ 1
+			
+			chosenTargets = []
+			maxDamage = 0
+			availableTargets = [q for q in self.armies[enemy].keys() if q not in self.targets]
+			basicDamage = u.units * u.damagePts
+			for t in availableTargets:
+				_d = basicDamage
+				if u.damageType in self.armies[enemy][t].immune:
+					_d *= 0
+				if u.damageType in self.armies[enemy][t].weakness:
+					_d *= 2
+				if _d > 0:
+					if _d > maxDamage:
+						maxDamage = _d
+						chosenTargets = [t]
+					elif _d == maxDamage:
+						chosenTargets.append(t)
+
+			if len(chosenTargets) == 0:
+				continue
+			
+			if len(chosenTargets) > 1:
+				# tie break by effective power
+				maxEPArr = []
+				maxEP = 0
+				for t in chosenTargets:
+					_ep = self.armies[enemy][t].effectivePower()
+					if _ep > maxEP:
+						maxEP = _ep
+						maxEPArr = [t]
+					elif _ep == maxEP:
+						maxEPArr.append(t)
+				chosenTargets = maxEPArr
+				
+			if len(chosenTargets) > 1:
+				# tie break by initiative
+				maxInitArr = []
+				maxInit = 0
+				for t in chosenTargets:
+					_init = self.armies[enemy][t].initiative
+					if _init > maxInit:
+						maxInit = _init
+						maxInitArr = [t]
+					elif _init == maxInit:
+						maxInitArr.append(t)
+				chosenTargets = maxInitArr
+				
+			if len(chosenTargets) == 1:
+				self.targets[chosenTargets[0]] = _unitID
+				self.targetsR[_unitID] = chosenTargets[0]
+			else:
+				print("Something went wrong, _UnitID = {}, chosenTargets = {}".format(_unitID, chosenTargets))
+				quit()
+		
+		
+				
+	def isAlive(self, unitID):
+		return unitID in self.armies[0] or unitID in self.armies[1]
+			
+	def getUnit(self, unitID):
+		a = int(unitID.split("_")[0])
+		return a, self.armies[a][unitID]
+		
+	def sortArmies(self, _type="ep-init"):
+		# combine the 2 armies into a sane dictionary
+		ret = {}
+		if _type == "ep-init":
+			effPowers = {}
+			for i in range(2):
+				for _unit in self.armies[i]:
+					_EP = self.armies[i][_unit].effectivePower()
+					if _EP in effPowers:
+						effPowers[_EP].append(_unit)
+					else:
+						effPowers[_EP] = [_unit]
+			for p in effPowers:
+				if len(effPowers[p]) == 1:
+					ret[effPowers[p][0]] = p
+				else:
+					_tmpCount = 0
+					for u in effPowers[p]:
+						ret[effPowers[p][_tmpCount]] = p + self.armies[int(u.split("_")[0])][u].initiative/100
+						_tmpCount += 1
+		elif _type == "init":
+			inits = {}
+			for i in range(2):
+				for _unit in self.armies[i]:
+					ret[_unit] = self.armies[i][_unit].initiative
+		else:
+			print("Undefined sort type {}".format(_type))
+			quit()
+		
+		return sorted(ret, key=ret.get, reverse=True)
+	
+	def printStatus(self):
+		ordnung = ["Immune System", "Infection"]
+		for i in range(2):
+			print(ordnung[i])
+			for uid in self.armies[i]:
+				print("Group {} contains {} units".format(uid, self.armies[i][uid].units))
+	
+	def parseInput(self):
+		self.it = -1
 		for i in range(2):
 			self.it += 2
 			n = 0
@@ -63,163 +223,5 @@ class Problem():
 				self.armies[i][str(i) + "_" + str(n)] = _group
 				n += 1
 				self.it += 1
-	
-# 		print("IMMUNE\n{}\nINFECTION\n{}\n========".format(self.armies[0], self.armies[1]))
-		self.rounds = 0
-		while len(self.armies[0]) and len(self.armies[1]):
-			self.rounds += 1
-			print("Tick {}".format(self.rounds), end='\r')
-			# self.printStatus()
-			# print("")
-			self.tick()
-			# print("===============\n")
-		
-		self.part1 = 0
-		for i in range(2):
-			for uid in self.armies[i]:
-				self.part1 += self.armies[i][uid].units
-		print("Part 1 = {}".format(self.part1))
-		
-		if self.part1 >= 26281:
-			print("Too High")
-	
-	def tick(self):
-		# Target Selection
-		gesortiert = self.sortArmies("ep-init")
-		self.targets = {} # <k,v> = Target, Attacker
-		self.targetsR = {} # <k,v> = Attacker, Target
-		for _unitID in gesortiert:
-			klasse, u = self.getUnit(_unitID)
-			enemy = klasse ^ 1
-			
-			chosenTargets = []
-			maxDamage = 0
-			availableTargets = [q for q in self.armies[enemy].keys() if q not in self.targets]
-			basicDamage = u.units * u.damagePts
-			for t in availableTargets:
-				_d = basicDamage
-				if u.damageType in self.armies[enemy][t].immune:
-					_d *= 0
-				if u.damageType in self.armies[enemy][t].weakness:
-					_d *= 2
-				if _d > 0:
-					if _d > maxDamage:
-						maxDamage = _d
-						chosenTargets = [t]
-					elif _d == maxDamage:
-						chosenTargets.append(t)
-# 				print(_unitID, t, _d, maxDamage)
-# 			print(_unitID, chosenTargets)
-			
-			if len(chosenTargets) > 1:
-				# tie break by effective power
-				maxEPArr = []
-				maxEP = 0
-				for t in chosenTargets:
-					_ep = self.armies[enemy][t].units * self.armies[enemy][t].damagePts
-					if _ep > maxEP:
-						maxEP = _ep
-						maxEPArr = [t]
-					elif _ep == maxEP:
-						maxEPArr.append(t)
-				chosenTargets = maxEPArr
-# 			print(_unitID, chosenTargets)
-				
-			if len(chosenTargets) > 1:
-				# tie break by initiative
-				maxInitArr = []
-				maxInit = 0
-				for t in chosenTargets:
-					_init = self.armies[enemy][t].initiative
-					if _init > maxInit:
-						maxInit = _init
-						maxInitArr = [t]
-					elif _init == maxInit:
-						maxInitArr.append(t)
-				chosenTargets = maxInitArr
-# 			print(_unitID, chosenTargets)
-				
-			if len(chosenTargets) == 1:
-				self.targets[chosenTargets[0]] = _unitID
-				self.targetsR[_unitID] = chosenTargets[0]
-			else:
-				# no one to fight
-				pass
-# 				print("Something went wrong, _UnitID = {}, chosenTargets = {}".format(_unitID, chosenTargets))
-# 				quit()
-		
-		# Attacking Phase	
-		gesortiert2 = self.sortArmies("init")
-		for _unitID in gesortiert2:
-			if self.isAlive(_unitID) and _unitID in self.targetsR and self.isAlive(self.targetsR[_unitID]): # Can attack and enemy is alive
-				klasse, u = self.getUnit(_unitID)
-				enemy = klasse ^ 1
-				_dmg = u.damagePts * u.units
-				if u.damageType in self.armies[enemy][self.targetsR[_unitID]].immune:
-					_dmg *= 0
-				if u.damageType in self.armies[enemy][self.targetsR[_unitID]].weakness:
-					_dmg *= 2
-				
-				_deltaU = _dmg // self.armies[enemy][self.targetsR[_unitID]].hp
-				self.armies[enemy][self.targetsR[_unitID]].units -= _deltaU
-				
-				print("{} attacks {} with {}, killing {} units".format(_unitID, self.targetsR[_unitID], _dmg, _deltaU))
-				
-				
-# 				print("{} attacks {}, killing {} units".format(_unitID, self.targetsR[_unitID], _deltaU))
-				
-				# check if ded
-				if self.armies[enemy][self.targetsR[_unitID]].units <= 0:
-					del self.armies[enemy][self.targetsR[_unitID]]
-					
-					# Check if anybody else alive
-					if not len(self.armies[enemy]):
-						print("\n{} dead".format(enemy))
-						print(self.armies)
-						return
-				
-	def isAlive(self, unitID):
-		return unitID in self.armies[0] or unitID in self.armies[1]
-			
-	def getUnit(self, unitID):
-		a = int(unitID.split("_")[0])
-		return a, self.armies[a][unitID]
-		
-	def sortArmies(self, _type="ep-init"):
-		# combine the 2 armies into a sane dictionary
-		ret = {}
-		if _type == "ep-init":
-			effPowers = {}
-			for i in range(2):
-				for _unit in self.armies[i]:
-					_EP = self.armies[i][_unit].units * self.armies[i][_unit].damagePts
-					if _EP in effPowers:
-						effPowers[_EP].append(_unit)
-					else:
-						effPowers[_EP] = [_unit]
-			for p in effPowers:
-				if len(effPowers[p]) == 1:
-					ret[effPowers[p][0]] = p
-				else:
-					for u in effPowers[p]:
-						ret[effPowers[p][0]] = p + self.armies[int(u.split("_")[0])][u].initiative/100
-
-		elif _type == "init":
-			inits = {}
-			for i in range(2):
-				for _unit in self.armies[i]:
-					ret[_unit] = self.armies[i][_unit].initiative
-		else:
-			print("Undefined sort type {}".format(_type))
-			quit()
-		
-		return sorted(ret, key=ret.get, reverse=True)
-	
-	def printStatus(self):
-		ordnung = ["Immune System", "Infection"]
-		for i in range(2):
-			print(ordnung[i])
-			for uid in self.armies[i]:
-				print("Group {} contains {} units".format(uid, self.armies[i][uid].units))
 		
 Problem()
