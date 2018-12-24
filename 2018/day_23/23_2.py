@@ -78,7 +78,7 @@ class Problem():
                     y += self.step
                 z += self.step
             print(largestCoords)
-            self.min = tuple(_c + math.floor(self.step/2) for _c in min(self.largestCoords))
+            self.min = tuple(_c for _c in min(self.largestCoords))
             # self.max = tuple(_c + math.floor(self.step/2) for _c in max(self.largestCoords))
             self.max = tuple(_c + self.step for _c in self.min)
             self.step //= 10
@@ -117,6 +117,9 @@ class Problem():
         #                     self.largestCoords.append((x, y, z))
         #
         # print(self.largestNumberOfNanobots, self.largestCoords)
+	def searchInCube(self, coord, step):
+		
+		
 
     def printProgress(self, _x, _y, _z):
         map = ["x", "y", "z"]

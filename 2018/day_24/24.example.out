@@ -1,0 +1,36 @@
+Tick 11_1 attacks 0_1 with 107640, killing 84 units
+0_1 attacks 1_0 with 22625, killing 4 units
+0_0 attacks 1_1 with 153238, killing 51 units
+1_0 attacks 0_0 with 184904, killing 34 units
+Tick 20_1 attacks 1_0 with 22625, killing 4 units
+1_0 attacks 0_1 with 183976, killing 144 units
+Tick 30_1 attacks 1_0 with 19025, killing 4 units
+1_0 attacks 0_1 with 183048, killing 143 units
+Tick 40_1 attacks 1_0 with 15450, killing 3 units
+1_0 attacks 0_1 with 182352, killing 143 units
+Tick 50_1 attacks 1_0 with 11875, killing 2 units
+1_0 attacks 0_1 with 181888, killing 142 units
+Tick 60_1 attacks 1_0 with 8325, killing 1 units
+1_0 attacks 0_1 with 181656, killing 142 units
+Tick 70_1 attacks 1_0 with 4775, killing 1 units
+1_0 attacks 0_1 with 181424, killing 142 units
+Tick 80_1 attacks 1_0 with 1225, killing 0 units
+1_0 attacks 0_1 with 181424, killing 142 units
+
+ 0 dead
+[{}, {'1_0': < Group 0 (Type 1): 
+  Units    = 782
+  HP       = 4706
+  Weakness = {'radiation': 1}
+  Immunity = {}
+  Damage   = 116 x bludgeoning
+  Init     = 1
+>, '1_1': < Group 1 (Type 1): 
+  Units    = 4434
+  HP       = 2961
+  Weakness = {'fire': 1, 'cold': 1}
+  Immunity = {'radiation': 1}
+  Damage   = 12 x slashing
+  Init     = 4
+>}]
+Part 1 = 5216
