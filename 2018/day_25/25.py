@@ -32,6 +32,7 @@ class Problem():
 						# print("<{}> {}".format(idxFound[0], idx), end=", ")
 						self.constellations[idxFound[0]] += self.constellations[idx]
 						del self.constellations[idx]
+				self.constellations[idxFound[0]].append(s)
 			# print("")
 
 		print("Part 1 = {}".format(len(self.constellations)))
