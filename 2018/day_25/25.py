@@ -21,11 +21,12 @@ class Problem():
 						if konst not in idxFound:
 							idxFound.append(konst)
 							found += 1
+			# print(found, idxFound)
 			if found == 0:
 				self.constellations[self.constCount] = [s]
 				self.constCount += 1
 			elif found == 1:
-				self.constellations[konst].append(s)
+				self.constellations[idxFound[0]].append(s)
 			elif found > 1:
 				for idx in idxFound:
 					if idx != idxFound[0]:
