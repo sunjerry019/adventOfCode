@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import numpy as np
 import itertools
-import copy
 
 class Problem():
     def __init__(self):
